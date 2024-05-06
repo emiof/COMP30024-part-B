@@ -9,6 +9,8 @@ class Agent:
     This class is the "entry point" for your agent, providing an interface to
     respond to various Tetress game events.
     """
+    #start with empty board class from previous project
+
 
     def __init__(self, color: PlayerColor, **referee: dict):
         """
@@ -55,6 +57,7 @@ class Agent:
         This method is called by the referee after an agent has taken their
         turn. You should use it to update the agent's internal game state. 
         """
+        #update local board state
 
         # There is only one action type, PlaceAction
         place_action: PlaceAction = action

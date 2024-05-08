@@ -18,7 +18,7 @@ class TBoard:
         self.player_playable_tetrominos: dict[PlayerColor, set[Tetromino]] = player_playable_tetrominos
         self.t_board_counter: TBoardCounter = t_board_counter
 
-    def playable_tetrominos(self, player: PlayerColor ) -> list[Tetromino]:
+    def playable_tetrominos(self, player: PlayerColor) -> list[Tetromino]:
         return list(self.player_playable_tetrominos[player])
     
     def max_turn_reached(self) -> bool:
@@ -49,7 +49,7 @@ class TBoard:
 
         self.turn_count += 1
 
-        removed_rows, removed_cols = self.t_board_counter.place_tetromino(tetromino, player)
+        removed_rows, removed_cols = self.t_board_counter.place_tetromino(tetromino)
         self.__remove_rows(removed_rows)
         self.__remove_cols(removed_cols)
 

@@ -26,16 +26,21 @@ class TBoard:
 
     def player_score(self, player: PlayerColor) -> float:
         if self.max_turn_reached():
-            player_tokens: int = self.t_board_counter.num_tokens(player)
-            opponent_tokens: int = self.t_board_counter.num_tokens(player.opponent())
+            player_tokens: int = self.num_tokens(player)
+            opponent_tokens: int = self.num_tokens(player.opponent())
             return float('inf') if player_tokens > opponent_tokens else float('-inf') if player_tokens < opponent_tokens else 0
+        elif not self.player_playable_tetrominos[player] or self.player_playable_tetrominos[player.opponent()]:
+            return float('-inf') if not self.player_playable_tetrominos[player] else float('inf')
 
         return len(self.player_playable_tetrominos[player]) - len(self.player_playable_tetrominos[player.opponent()])
     
     def copy(self) -> 'TBoard':
         return TBoard(self.board.copy(), self.turn_count, self.player_playable_tetrominos.copy(), self.t_board_counter.copy())
+    
+    def num_tokens(self, player: PlayerColor) -> float:
+        return sum([1 for _player in self.board.values() if _player == player])
 
-    def __place_tetromino(self, tetromino: Tetromino, player: PlayerColor) -> None:
+    def place_tetromino_in_place(self, tetromino: Tetromino, player: PlayerColor) -> None:
         for token in tetromino.tokens:
             if token in self.board:
                 raise Exception("Placing token in occupied coordinate")
@@ -50,6 +55,12 @@ class TBoard:
 
         self.__update_playable_tetrominos()
 
+    def place_tetromino(self, tetromino: Tetromino, player: PlayerColor) -> 'TBoard':
+        t_board_copy: 'TBoard' = TBoard(self.board.copy(), self.turn_count, self.player_playable_tetrominos.copy(), self.t_board_counter.copy())
+        t_board_copy.place_tetromino_in_place(tetromino, player)
+
+        return t_board_copy
+ 
     def __update_playable_tetrominos(self) -> None:
         self.player_playable_tetrominos[PlayerColor.BLUE] = self.__find_playable_tetrominos(PlayerColor.BLUE)
         self.player_playable_tetrominos[PlayerColor.RED] = self.__find_playable_tetrominos(PlayerColor.RED)
@@ -86,10 +97,3 @@ class TBoard:
                 if coord not in self.board:
                     raise Exception("Removing non-existent token")
                 del self.board[coord]
-    
-    @staticmethod 
-    def place_tetromino(t_board: 'TBoard', tetromino: Tetromino) -> 'TBoard':
-        t_board_copy: 'TBoard' = t_board.copy()
-        t_board_copy.__place_tetromino(tetromino)
-
-        return t_board_copy

@@ -2,7 +2,10 @@
 # Project Part B: Game Playing Agent
 
 from referee.game import PlayerColor, Action, PlaceAction, Coord
-
+from .t_board import TBoard
+from .tetromino import Tetromino
+from .best_next_move import best_next_move
+from .utils import minimax_depth
 
 class Agent:
     """
@@ -17,6 +20,8 @@ class Agent:
         This constructor method runs when the referee instantiates the agent.
         Any setup and/or precomputation should be done here.
         """
+        self.t_board: TBoard = TBoard()
+
         self._color = color
         match color:
             case PlayerColor.RED:
@@ -24,11 +29,20 @@ class Agent:
             case PlayerColor.BLUE:
                 print("Testing: I am playing as BLUE")
 
+
+
     def action(self, **referee: dict) -> Action:
         """
         This method is called by the referee each time it is the agent's turn
         to take an action. It must always return an action object. 
         """
+
+        alpha, beta = float('-inf'), float('inf')
+        time_remaining: float = referee['time-remaining']
+        space_remaining: float = referee['space-remaining']
+        
+        _, tetromino = best_next_move(self.t_board, self._color, self._color, alpha, beta, minimax_depth(time_remaining, space_remaining))
+        return tetromino.create_action()
 
         # Below we have hardcoded two actions to be played depending on whether
         # the agent is playing as BLUE or RED. Obviously this won't work beyond
@@ -57,8 +71,9 @@ class Agent:
         This method is called by the referee after an agent has taken their
         turn. You should use it to update the agent's internal game state. 
         """
-        #update local board state
 
+        self.t_board.place_tetromino_in_place(Tetromino.tetromino_from_action(action), color)
+        
         # There is only one action type, PlaceAction
         place_action: PlaceAction = action
         c1, c2, c3, c4 = place_action.coords

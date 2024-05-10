@@ -1,7 +1,6 @@
-from ..referee.game.pieces import _TEMPLATES
-from ..referee.game.coord import Coord
-from ..referee.game.actions import Action
-from ..referee.game.player import PlayerColor
+from referee.game.pieces import _TEMPLATES
+from referee.game.coord import Coord
+from referee.game.actions import Action
 
 class Tetromino:
     """

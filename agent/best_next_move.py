@@ -1,7 +1,8 @@
-from ..referee.game import PlayerColor
+from referee.game.constants import BOARD_N
+from referee.game import PlayerColor, Coord
 from .t_board import TBoard
 from .tetromino import Tetromino
-from ..referee.game.actions import Action
+from .utils import random_adj_coords, random_coord
 
 def best_next_move(
     t_board: TBoard,
@@ -26,9 +27,9 @@ def best_next_move(
         max_utility_move: Tetromino | None = None 
 
         for tetromino in playable_tetrominos:
-            utility, _ = best_next_move(t_board.place_tetromino(tetromino, curr_player), curr_player.opponent(), main_player, alpha, beta, depth - 1)
+            utility, _ = best_next_move(t_board.place_tetromino(tetromino, curr_player), curr_player.opponent, main_player, alpha, beta, depth - 1)
             
-            if utility > max_utility:
+            if utility >= max_utility:
                 max_utility, max_utility_move = utility, tetromino
 
             if max_utility > beta:
@@ -42,9 +43,9 @@ def best_next_move(
         min_utility_move: Tetromino | None = None
 
         for tetromino in playable_tetrominos:
-            utility, _ = best_next_move(t_board.place_tetromino(tetromino, curr_player), curr_player.opponent(), main_player, alpha, beta, depth - 1)
+            utility, _ = best_next_move(t_board.place_tetromino(tetromino, curr_player), curr_player.opponent, main_player, alpha, beta, depth - 1)
 
-            if utility < min_utility:
+            if utility <= min_utility:
                 min_utility, min_utility_move = utility, tetromino
 
             if min_utility < alpha:
@@ -53,4 +54,4 @@ def best_next_move(
             beta = min(min_utility, beta)
             
         return min_utility, min_utility_move
-    
+

@@ -1,5 +1,6 @@
-from ..referee.game.constants import BOARD_N
-from ..referee.game.coord import Coord
+from referee.game.constants import BOARD_N
+from referee.game.coord import Coord
+from random import choice, randint
 
 def row_coords(row: int) -> list[Coord]:
     if row >= BOARD_N or row < 0:

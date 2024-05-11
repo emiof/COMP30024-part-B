@@ -1,6 +1,5 @@
 from referee.game.constants import BOARD_N
 from referee.game.coord import Coord
-from random import choice, randint
 
 def row_coords(row: int) -> list[Coord]:
     if row >= BOARD_N or row < 0:
@@ -15,4 +14,4 @@ def col_coords(col: int) -> list[Coord]:
     return [Coord(row, col) for row in range(BOARD_N)]
 
 def minimax_depth(time_remaining: float, space_remaining: float) -> int:
-    return 100
+    pass 

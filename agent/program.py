@@ -5,7 +5,6 @@ from referee.game import PlayerColor, Action, PlaceAction, Coord
 from .t_board import TBoard
 from .tetromino import Tetromino
 from .best_next_move import best_next_move
-from .utils import minimax_depth
 
 class Agent:
     """
@@ -43,7 +42,7 @@ class Agent:
         time_remaining: float = referee['time_remaining']
         space_remaining: float = referee['space_remaining']
         
-        _, tetromino = best_next_move(self.t_board, self._color, self._color, alpha, beta, minimax_depth(time_remaining, space_remaining))
+        _, tetromino = best_next_move(self.t_board, self._color, self._color, alpha, beta, 2)
         return tetromino.create_action()
 
         # Below we have hardcoded two actions to be played depending on whether

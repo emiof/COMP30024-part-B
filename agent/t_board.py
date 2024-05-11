@@ -4,6 +4,7 @@ from referee.game.constants import BOARD_N, MAX_TURNS
 from .tetromino import Tetromino
 from .t_board_counter import TBoardCounter
 from .utils import row_coords, col_coords
+import numpy as np
 
 class TBoard:
     def __init__(
@@ -17,7 +18,6 @@ class TBoard:
         self.turn_count: int = turn_count
         self.player_playable_tetrominos: dict[PlayerColor, set[Tetromino]] = player_playable_tetrominos
         self.t_board_counter: TBoardCounter = t_board_counter   
-
     
     def any_playable_tetromino(self) -> Tetromino:
         for row in range(BOARD_N):
@@ -83,7 +83,7 @@ class TBoard:
                 curr_coord: Coord = Coord(row, col)
                 if curr_coord not in self.board and self.__has_adj_token(curr_coord, player):
                     for tetromino in Tetromino.all_tetrominos_at(curr_coord):
-                        if tetromino not in tetrominos and self.__can_place_tetromino(tetromino):
+                        if tetromino not in tetrominos and  self.__can_place_tetromino(tetromino):
                             tetrominos.add(tetromino)
 
         return tetrominos
@@ -105,3 +105,13 @@ class TBoard:
             for coord in col_coords(col_index):
                 if coord in self.board:
                     del self.board[coord]
+
+    @staticmethod
+    def create_board_id(t_board: 'TBoard') -> int:
+        compute_board_position = lambda row, col: row * BOARD_N + col
+        board_positions: np.ndarray = np.zeros(BOARD_N * BOARD_N)
+
+        for coord, player in t_board.board.items():
+            board_positions[compute_board_position(coord.r, coord.c)] = 2 if player == PlayerColor.RED else 1
+
+        return hash(tuple(board_positions))

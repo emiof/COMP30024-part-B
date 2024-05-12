@@ -13,7 +13,6 @@ class Agent:
     """
     #start with empty board class from previous project
 
-
     def __init__(self, color: PlayerColor, **referee: dict):
         """
         This constructor method runs when the referee instantiates the agent.
@@ -27,7 +26,6 @@ class Agent:
                 print("Testing: I am playing as RED")
             case PlayerColor.BLUE:
                 print("Testing: I am playing as BLUE")
-
 
 
     def action(self, **referee: dict) -> Action:

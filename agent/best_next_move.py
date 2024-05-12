@@ -32,7 +32,7 @@ def best_next_move(
             if utility >= max_utility:
                 max_utility, max_utility_move = utility, tetromino
 
-            if max_utility > beta:
+            if max_utility >= beta:
                 return max_utility, max_utility_move
 
             alpha = max(max_utility, alpha)
@@ -48,7 +48,7 @@ def best_next_move(
             if utility <= min_utility:
                 min_utility, min_utility_move = utility, tetromino
 
-            if min_utility < alpha:
+            if min_utility <= alpha:
                 return min_utility, min_utility_move
             
             beta = min(min_utility, beta)

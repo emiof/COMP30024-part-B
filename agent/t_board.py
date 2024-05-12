@@ -4,6 +4,7 @@ from referee.game.constants import BOARD_N, MAX_TURNS
 from .tetromino import Tetromino
 from .t_board_counter import TBoardCounter
 from .misc import row_coords, col_coords, all_board_coords
+from .desirability_metric import DesirabilityMetric
 import numpy as np
 
 class TBoard:
@@ -31,7 +32,12 @@ class TBoard:
                             return tetromino
 
     def playable_tetrominos(self, player: PlayerColor) -> list[Tetromino]:
-        return list(self.player_playable_tetrominos[player])
+        tetromino_key = lambda tetromino: TBoard.tetromino_desirability(self.board, tetromino, player, DesirabilityMetric.OPPONENT_ADJ_TOKENS)
+
+        tetromino_list: list[Tetromino] = list(self.player_playable_tetrominos[player])
+        tetromino_list.sort(reverse=True, key=tetromino_key)
+
+        return tetromino_list
     
     def max_turn_reached(self) -> bool:
         return self.turn_count == MAX_TURNS
@@ -110,6 +116,12 @@ class TBoard:
                     self.player_num_tokens[self.board[coord]] -= 1
                     del self.board[coord]
 
+    @staticmethod
+    def tetromino_desirability(t_board: 'TBoard', tetromino: Tetromino, player: PlayerColor, desirability_metric: DesirabilityMetric) -> float:
+        match desirability_metric:
+            case DesirabilityMetric.OPPONENT_ADJ_TOKENS:
+                return sum([1 for adj_coord in tetromino.all_adj_coords() if adj_coord in t_board and t_board[adj_coord] == player.opponent])
+        
     @staticmethod
     def create_board_id(t_board: 'TBoard') -> int:
         compute_board_position = lambda row, col: row * BOARD_N + col

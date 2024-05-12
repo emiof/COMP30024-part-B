@@ -18,6 +18,16 @@ class Tetromino:
     def __eq__(self, other: 'Tetromino') -> bool:
         return self.tokens == other.tokens
     
+    def all_adj_coords(self) -> list[Coord]:
+        adj_coords: set[Coord] = set()
+        tetromino_coords: set[Coord] = set(self.tokens)
+
+        for token in self.tokens:
+            for adj_coord in filter(lambda adj_coord_: adj_coord_ not in tetromino_coords, [token.up(), token.down(), token.right(), token.left()]):
+                adj_coords.add(adj_coord)
+
+        return list(adj_coords)
+
     @staticmethod
     def all_tetrominos_at(at: Coord) -> list['Tetromino']:
         return [Tetromino(*[at + coord for coord in piece]) for piece in _TEMPLATES.values()]

@@ -96,14 +96,14 @@ class TBoard:
         if time_remaining == None:
             if (num_playable_moves < 10):
                 return max_depth
-            elif (num_playable_moves> 40):
+            elif (num_playable_moves > 45):
                 return min_depth
             else:       
                 return normal_depth
         elif (time_remaining > 75):
             if (num_playable_moves < 15):
                 return max_depth
-            elif (num_playable_moves > 60):
+            elif (num_playable_moves > 65):
                 return min_depth
             else:       
                 return normal_depth

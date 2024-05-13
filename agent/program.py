@@ -43,7 +43,6 @@ class Agent:
         
         minimax_depth = self.t_board.minimax_depth(time_remaining, self._color, max_depth=6, normal_depth=4, min_depth=2)
 
-        print(minimax_depth)
         _, tetromino = best_next_move(self.t_board, self._color, self._color, alpha, beta, minimax_depth)
         return tetromino.create_action()
 

@@ -15,7 +15,8 @@ def best_next_move(
     Utilizes the minimax algorithm with alpha-beta pruning and a depth limit, to identify the move by the current player,
     at the current board state, which leads to a maximized utility. 
     """
-    playable_tetrominos: list[Tetromino] = t_board.playable_tetrominos(player, sort=True, remove_similar=True)
+    num_playable_tetrominos: int = t_board.num_playable_tetrorminos(player)
+    playable_tetrominos: list[Tetromino] = t_board.playable_tetrominos(player, sort=True, remove_similar = num_playable_tetrominos >= 5)
 
 
     if depth == 0 or t_board.max_turn_reached() or not playable_tetrominos: 

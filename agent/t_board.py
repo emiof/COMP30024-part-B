@@ -31,6 +31,9 @@ class TBoard:
                     for tetromino in Tetromino.all_tetrominos_at(curr_coord):
                         if self.__tetromino_fits(tetromino):
                             return tetromino
+                        
+    def num_playable_tetrorminos(self, player: PlayerColor) -> int:
+        return len(self.player_playable_tetrominos[player])
 
     def playable_tetrominos(self, player: PlayerColor, *, sort: bool = False, remove_similar: bool = False) -> list[Tetromino]:
         if sort:
@@ -88,7 +91,7 @@ class TBoard:
         return calculate_move_desirability(self.board, tetromino, player, desirability_metric)
 
     def minimax_depth(self, time_remaining: float | None, player: PlayerColor, *, max_depth: int, normal_depth: int, min_depth: int) -> int:
-        num_playable_moves: int = len(self.playable_tetrominos(player))
+        num_playable_moves: int = self.num_playable_tetrorminos(player)
 
         if time_remaining == None:
             if (num_playable_moves < 10):

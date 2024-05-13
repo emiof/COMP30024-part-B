@@ -39,8 +39,11 @@ class Agent:
         alpha, beta = float('-inf'), float('inf')
         time_remaining: float = referee['time_remaining']
         space_remaining: float = referee['space_remaining']
+        #print(time_remaining)
+        #print("Playable Moves: " + str((len(self.t_board.playable_tetrominos(self._color)))))
         
-        _, tetromino = best_next_move(self.t_board, self._color, self._color, alpha, beta, 2)
+        depth = self.t_board.minimax_depth(time_remaining, self._color)
+        _, tetromino = best_next_move(self.t_board, self._color, self._color, alpha, beta, depth)
         return tetromino.create_action()
 
         # Below we have hardcoded two actions to be played depending on whether

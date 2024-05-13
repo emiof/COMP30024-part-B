@@ -131,3 +131,28 @@ class TBoard:
             board_positions[compute_board_position(coord.r, coord.c)] = 2 if player == PlayerColor.RED else 1
 
         return hash(tuple(board_positions))
+
+    def minimax_depth(self, time_remaining: float | None, player: PlayerColor) -> int:
+        if time_remaining == None:
+            if (len(self.playable_tetrominos(player)) < 10):
+                return 3
+            elif (len(self.playable_tetrominos(player)) > 40):
+                return 1
+            else:       
+                return 2
+        if (time_remaining > 75):
+            if (len(self.playable_tetrominos(player)) < 15):
+                return 3
+            elif (len(self.playable_tetrominos(player)) > 60):
+                return 1
+            else:       
+                return 2
+        elif (time_remaining < 10):
+            return 1
+        else:
+            if (len(self.playable_tetrominos(player)) < 10):
+                return 3
+            elif (len(self.playable_tetrominos(player)) > 40):
+                return 1
+            else:       
+                return 2

@@ -22,6 +22,5 @@ def all_board_coords() -> list[Coord]:
 
     return coords
 
-
 def minimax_depth(time_remaining: float, space_remaining: float) -> int:
     pass 

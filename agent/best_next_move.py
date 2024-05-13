@@ -18,6 +18,7 @@ def best_next_move(
     """
     playable_tetrominos: list[Tetromino] = t_board.playable_tetrominos(player)
 
+
     if depth == 0 or t_board.max_turn_reached() or not playable_tetrominos: 
         # Reached max depth, terminal state, or a state where the current player can't make any moves. 
         return t_board.player_score(main_player), None 

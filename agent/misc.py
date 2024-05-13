@@ -22,8 +22,5 @@ def all_board_coords() -> list[Coord]:
 
     return coords
 
-def minimax_depth(time_remaining: float, space_remaining: float) -> int:
-    pass 
-
 def coord_adjacents(coord: Coord) -> list[Coord]:
     return [coord.up(), coord.down(), coord.right(), coord.left()]

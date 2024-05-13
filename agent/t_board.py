@@ -3,7 +3,7 @@ from referee.game.player import PlayerColor
 from referee.game.constants import BOARD_N, MAX_TURNS
 from .tetromino import Tetromino
 from .t_board_counter import TBoardCounter
-from .misc import row_coords, col_coords, all_board_coords
+from .misc import row_coords, col_coords, all_board_coords, coord_adjacents
 from .move_ordering import calculate_move_desirability, DesirabilityMetric
 import numpy as np
 from typing import Callable
@@ -29,12 +29,12 @@ class TBoard:
                 curr_coord: Coord = Coord(row, col)
                 if curr_coord not in self.board:
                     for tetromino in Tetromino.all_tetrominos_at(curr_coord):
-                        if self.__can_place_tetromino(tetromino):
+                        if self.__tetromino_fits(tetromino):
                             return tetromino
 
-    def playable_tetrominos(self, player: PlayerColor, *, sort: bool, remove_similar: bool) -> list[Tetromino]:
+    def playable_tetrominos(self, player: PlayerColor, *, sort: bool = False, remove_similar: bool = False) -> list[Tetromino]:
         if sort:
-            find_desirability: Callable[[Tetromino], tuple[Tetromino, float]] = lambda tetro: (tetro, self.tetromino_desirability(tetro, player))
+            find_desirability = lambda tetro: (tetro, self.tetromino_desirability(tetro, player, DesirabilityMetric.NUM_NOT_OWN_ADJ_COORDS))
             key = lambda elem: elem[1]
 
             sorted_tetrominos: list[tuple[Tetromino, float]] = sorted(list(map(find_desirability, self.player_playable_tetrominos[player])), reverse=True, key=key)
@@ -84,8 +84,35 @@ class TBoard:
 
         return t_board_copy
     
-    def tetromino_desirability(self, tetromino: Tetromino, player: PlayerColor) -> float:
-        return calculate_move_desirability(self.board, tetromino, player, DesirabilityMetric.EMPTY_ADJ_DIFFERENCE)
+    def tetromino_desirability(self, tetromino: Tetromino, player: PlayerColor, desirability_metric: DesirabilityMetric) -> float:
+        return calculate_move_desirability(self.board, tetromino, player, desirability_metric)
+
+    def minimax_depth(self, time_remaining: float | None, player: PlayerColor, *, max_depth: int, normal_depth: int, min_depth: int) -> int:
+        num_playable_moves: int = len(self.playable_tetrominos(player))
+
+        if time_remaining == None:
+            if (num_playable_moves < 10):
+                return max_depth
+            elif (num_playable_moves> 40):
+                return min_depth
+            else:       
+                return normal_depth
+        elif (time_remaining > 75):
+            if (num_playable_moves < 15):
+                return max_depth
+            elif (num_playable_moves > 60):
+                return min_depth
+            else:       
+                return normal_depth
+        elif (time_remaining < 10):
+            return min_depth
+        else:
+            if (num_playable_moves < 10):
+                return max_depth
+            elif (num_playable_moves > 40):
+                return min_depth
+            else:       
+                return normal_depth
  
     def __update_playable_tetrominos(self) -> None:
         self.player_playable_tetrominos = self.__find_playable_tetrominos()
@@ -95,22 +122,23 @@ class TBoard:
         blue_tetrominos: set[Tetromino] = set()
 
         for coord in all_board_coords():
-            blue_adj_token, red_adj_token = self.__has_adj_token(coord, PlayerColor.BLUE), self.__has_adj_token(coord, PlayerColor.RED)
-
-            if coord not in self.board and (blue_adj_token or red_adj_token):
-                for tetromino in [tetromino_ for tetromino_ in Tetromino.all_tetrominos_at(coord) if self.__can_place_tetromino(tetromino_)]:
-                    if tetromino not in red_tetrominos and red_adj_token:
+            if coord not in self.board:
+                for tetromino in [tetromino_ for tetromino_ in Tetromino.all_tetrominos_at(coord) if self.__tetromino_fits(tetromino_)]:
+                    if tetromino not in red_tetrominos and self.__can_place_tetromino(tetromino, PlayerColor.RED):
                         red_tetrominos.add(tetromino)
-                    if tetromino not in blue_tetrominos and blue_adj_token:
+                    if tetromino not in blue_tetrominos and self.__can_place_tetromino(tetromino, PlayerColor.BLUE):
                         blue_tetrominos.add(tetromino)
 
         return {PlayerColor.RED: red_tetrominos, PlayerColor.BLUE: blue_tetrominos}
     
-    def __can_place_tetromino(self, tetromino: Tetromino) -> bool:
-        return all(coord not in self.board for coord in tetromino.tokens)
+    def __tetromino_fits(self, tetromino: Tetromino) -> bool:
+        return all(token not in self.board for token in tetromino.tokens)
+    
+    def __can_place_tetromino(self, tetromino: Tetromino, player: PlayerColor) -> bool:
+        return self.__tetromino_fits(tetromino) and any(self.__has_adj_token(coord, player) for coord in tetromino.tokens)
     
     def __has_adj_token(self, coord: Coord, player: PlayerColor) -> bool:
-        return any(self.board[_coord] == player for _coord in [coord.up(), coord.down(), coord.right(), coord.left()] if _coord in self.board)
+        return any(self.board[adj_coord] == player for adj_coord in coord_adjacents(coord) if adj_coord in self.board)
     
     def __remove_rows(self, rows: list[int]) -> None:
         for row_index in rows:
@@ -135,28 +163,3 @@ class TBoard:
             board_positions[compute_board_position(coord.r, coord.c)] = 2 if player == PlayerColor.RED else 1
 
         return hash(tuple(board_positions))
-
-    def minimax_depth(self, time_remaining: float | None, player: PlayerColor) -> int:
-        if time_remaining == None:
-            if (len(self.playable_tetrominos(player, sort=False, remove_similar=False)) < 10):
-                return 3
-            elif (len(self.playable_tetrominos(player, sort=False, remove_similar=False)) > 40):
-                return 1
-            else:       
-                return 2
-        if (time_remaining > 75):
-            if (len(self.playable_tetrominos(player, sort=False, remove_similar=False)) < 15):
-                return 3
-            elif (len(self.playable_tetrominos(player, sort=False, remove_similar=False)) > 60):
-                return 1
-            else:       
-                return 2
-        elif (time_remaining < 10):
-            return 1
-        else:
-            if (len(self.playable_tetrominos(player, sort=False, remove_similar=False)) < 10):
-                return 3
-            elif (len(self.playable_tetrominos(player, sort=False, remove_similar=False)) > 40):
-                return 1
-            else:       
-                return 2

@@ -33,40 +33,17 @@ class Agent:
         This method is called by the referee each time it is the agent's turn
         to take an action. It must always return an action object. 
         """
+
         if self.t_board.turn_count <= 1:
             return self.t_board.any_playable_tetromino().create_action()
 
         alpha, beta = float('-inf'), float('inf')
         time_remaining: float = referee['time_remaining']
         space_remaining: float = referee['space_remaining']
-        #print(time_remaining)
-        #print("Playable Moves: " + str((len(self.t_board.playable_tetrominos(self._color)))))
         
-        depth = self.t_board.minimax_depth(time_remaining, self._color)
-        _, tetromino = best_next_move(self.t_board, self._color, self._color, alpha, beta, depth)
+        minimax_depth = self.t_board.minimax_depth(time_remaining, self._color, max_depth=4, normal_depth=3, min_depth=2)
+        _, tetromino = best_next_move(self.t_board, self._color, self._color, alpha, beta, minimax_depth)
         return tetromino.create_action()
-
-        # Below we have hardcoded two actions to be played depending on whether
-        # the agent is playing as BLUE or RED. Obviously this won't work beyond
-        # the initial moves of the game, so you should use some game playing
-        # technique(s) to determine the best action to take.
-        match self._color:
-            case PlayerColor.RED:
-                print("Testing: RED is playing a PLACE action")
-                return PlaceAction(
-                    Coord(3, 3), 
-                    Coord(3, 4), 
-                    Coord(4, 3), 
-                    Coord(4, 4)
-                )
-            case PlayerColor.BLUE:
-                print("Testing: BLUE is playing a PLACE action")
-                return PlaceAction(
-                    Coord(2, 3), 
-                    Coord(2, 4), 
-                    Coord(2, 5), 
-                    Coord(2, 6)
-                )
 
     def update(self, color: PlayerColor, action: Action, **referee: dict):
         """

@@ -10,13 +10,12 @@ def best_next_move(
     alpha: float,
     beta: float,
     depth: int,
-    max_utilities: dict[int, float] = {}
 ) -> tuple[float, Tetromino | None]:
     """
     Utilizes the minimax algorithm with alpha-beta pruning and a depth limit, to identify the move by the current player,
     at the current board state, which leads to a maximized utility. 
     """
-    playable_tetrominos: list[Tetromino] = t_board.playable_tetrominos(player)
+    playable_tetrominos: list[Tetromino] = t_board.playable_tetrominos(player, True, True)
 
     if depth == 0 or t_board.max_turn_reached() or not playable_tetrominos: 
         # Reached max depth, terminal state, or a state where the current player can't make any moves. 
@@ -54,4 +53,3 @@ def best_next_move(
             beta = min(min_utility, beta)
             
         return min_utility, min_utility_move
-

@@ -4,8 +4,9 @@ from referee.game.constants import BOARD_N, MAX_TURNS
 from .tetromino import Tetromino
 from .t_board_counter import TBoardCounter
 from .misc import row_coords, col_coords, all_board_coords
-from .desirability_metric import DesirabilityMetric
+from .move_ordering import calculate_move_desirability, DesirabilityMetric
 import numpy as np
+from typing import Callable
 
 class TBoard:
     def __init__(
@@ -31,13 +32,19 @@ class TBoard:
                         if self.__can_place_tetromino(tetromino):
                             return tetromino
 
-    def playable_tetrominos(self, player: PlayerColor) -> list[Tetromino]:
-        tetromino_key = lambda tetromino: TBoard.tetromino_desirability(self.board, tetromino, player, DesirabilityMetric.OPPONENT_ADJ_TOKENS)
+    def playable_tetrominos(self, player: PlayerColor, sort: bool, remove_similar: bool) -> list[Tetromino]:
+        if sort:
+            find_desirability: Callable[[Tetromino], tuple[Tetromino, float]] = lambda tetro: (tetro, self.tetromino_desirability(tetro, player))
+            key = lambda elem: elem[1]
 
-        tetromino_list: list[Tetromino] = list(self.player_playable_tetrominos[player])
-        tetromino_list.sort(reverse=True, key=tetromino_key)
+            sorted_tetrominos: list[tuple[Tetromino, float]] = sorted(list(map(find_desirability, self.player_playable_tetrominos[player])), reverse=True, key=key)
 
-        return tetromino_list
+            if remove_similar:
+                sorted_tetrominos = [sorted_tetrominos[i] for i in range(len(sorted_tetrominos)) if i == 0 or sorted_tetrominos[i][1] != sorted_tetrominos[i-1][1]]
+
+            return [tetromino for tetromino, _ in sorted_tetrominos]
+        else:
+            return list(self.player_playable_tetrominos[player])
     
     def max_turn_reached(self) -> bool:
         return self.turn_count == MAX_TURNS
@@ -76,6 +83,9 @@ class TBoard:
         t_board_copy.place_tetromino_in_place(tetromino, player)
 
         return t_board_copy
+    
+    def tetromino_desirability(self, tetromino: Tetromino, player: PlayerColor) -> float:
+        return calculate_move_desirability(self.board, tetromino, player, DesirabilityMetric.EMPTY_ADJ_DIFFERENCE)
  
     def __update_playable_tetrominos(self) -> None:
         self.player_playable_tetrominos = self.__find_playable_tetrominos()
@@ -115,13 +125,7 @@ class TBoard:
                 if coord in self.board:
                     self.player_num_tokens[self.board[coord]] -= 1
                     del self.board[coord]
-
-    @staticmethod
-    def tetromino_desirability(t_board: 'TBoard', tetromino: Tetromino, player: PlayerColor, desirability_metric: DesirabilityMetric) -> float:
-        match desirability_metric:
-            case DesirabilityMetric.OPPONENT_ADJ_TOKENS:
-                return sum([1 for adj_coord in tetromino.all_adj_coords() if adj_coord in t_board and t_board[adj_coord] == player.opponent])
-        
+                
     @staticmethod
     def create_board_id(t_board: 'TBoard') -> int:
         compute_board_position = lambda row, col: row * BOARD_N + col

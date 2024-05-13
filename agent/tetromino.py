@@ -1,6 +1,7 @@
 from referee.game.pieces import _TEMPLATES
 from referee.game.coord import Coord
 from referee.game.actions import Action
+from .misc import coord_adjacents
 
 class Tetromino:
     """
@@ -18,12 +19,18 @@ class Tetromino:
     def __eq__(self, other: 'Tetromino') -> bool:
         return self.tokens == other.tokens
     
+    def __str__(self) -> str:
+        return str(self.tokens)
+    
+    def __repr__(self) -> str:
+        return self.__str__()
+    
     def all_adj_coords(self) -> list[Coord]:
         adj_coords: set[Coord] = set()
         tetromino_coords: set[Coord] = set(self.tokens)
 
         for token in self.tokens:
-            for adj_coord in filter(lambda adj_coord_: adj_coord_ not in tetromino_coords, [token.up(), token.down(), token.right(), token.left()]):
+            for adj_coord in filter(lambda adj_coord_: adj_coord_ not in tetromino_coords, coord_adjacents(token)):
                 adj_coords.add(adj_coord)
 
         return list(adj_coords)

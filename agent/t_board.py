@@ -32,7 +32,7 @@ class TBoard:
                         if self.__can_place_tetromino(tetromino):
                             return tetromino
 
-    def playable_tetrominos(self, player: PlayerColor, sort: bool, remove_similar: bool) -> list[Tetromino]:
+    def playable_tetrominos(self, player: PlayerColor, *, sort: bool, remove_similar: bool) -> list[Tetromino]:
         if sort:
             find_desirability: Callable[[Tetromino], tuple[Tetromino, float]] = lambda tetro: (tetro, self.tetromino_desirability(tetro, player))
             key = lambda elem: elem[1]
@@ -138,25 +138,25 @@ class TBoard:
 
     def minimax_depth(self, time_remaining: float | None, player: PlayerColor) -> int:
         if time_remaining == None:
-            if (len(self.playable_tetrominos(player)) < 10):
+            if (len(self.playable_tetrominos(player, sort=False, remove_similar=False)) < 10):
                 return 3
-            elif (len(self.playable_tetrominos(player)) > 40):
+            elif (len(self.playable_tetrominos(player, sort=False, remove_similar=False)) > 40):
                 return 1
             else:       
                 return 2
         if (time_remaining > 75):
-            if (len(self.playable_tetrominos(player)) < 15):
+            if (len(self.playable_tetrominos(player, sort=False, remove_similar=False)) < 15):
                 return 3
-            elif (len(self.playable_tetrominos(player)) > 60):
+            elif (len(self.playable_tetrominos(player, sort=False, remove_similar=False)) > 60):
                 return 1
             else:       
                 return 2
         elif (time_remaining < 10):
             return 1
         else:
-            if (len(self.playable_tetrominos(player)) < 10):
+            if (len(self.playable_tetrominos(player, sort=False, remove_similar=False)) < 10):
                 return 3
-            elif (len(self.playable_tetrominos(player)) > 40):
+            elif (len(self.playable_tetrominos(player, sort=False, remove_similar=False)) > 40):
                 return 1
             else:       
                 return 2

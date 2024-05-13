@@ -16,7 +16,7 @@ def best_next_move(
     at the current board state, which leads to a maximized utility. 
     """
     num_playable_tetrominos: int = t_board.num_playable_tetrorminos(player)
-    playable_tetrominos: list[Tetromino] = t_board.playable_tetrominos(player, sort=True, remove_similar = num_playable_tetrominos >= 5)
+    playable_tetrominos: list[Tetromino] = t_board.playable_tetrominos(player, sort=True, remove_similar = True)
 
 
     if depth == 0 or t_board.max_turn_reached() or not playable_tetrominos: 
